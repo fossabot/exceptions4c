@@ -17,7 +17,7 @@ which map the semantics of exception handling you're probably already used to:
 
 You can use exceptions in C by writing `try/catch/finally` blocks:
 
-```c
+~~~~~{.c}
 #include "e4c.h"
 
 int foobar(){
@@ -39,7 +39,7 @@ int foobar(){
 
     return(foo);
 }
-```
+~~~~~
 
 This way you will never have to deal again with boring error codes, or check
 return values every time you call a function.
