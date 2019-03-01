@@ -124,26 +124,28 @@ $(document).ready(function(){initNavTree('index.html','');});
 <li><code>throw</code></li>
 </ul>
 <p>You can use exceptions in C by writing <code>try/catch/finally</code> blocks:</p>
-<p>```c #include "e4c.h"</p>
-<p>int foobar(){ </p>
-<pre class="fragment">int foo;
-void * buffer = malloc(1024);
-
-if(buffer == NULL){
-    throw(NotEnoughMemoryException, "Could not allocate buffer.");
-}
-
-try{
-    foo = get_user_input(buffer, 1024);
-}catch(BadUserInputException){
-    foo = 123;
-}finally{
-    free(buffer);
-}
-
-return(foo);
-</pre><p> } ```</p>
-<p>This way you will never have to deal again with boring error codes, or check return values every time you call a function.</p>
+<div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="e4c_8h.html">e4c.h</a>&quot;</span></div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">int</span> foobar(){</div>
+<div class="line"></div>
+<div class="line">    <span class="keywordtype">int</span> foo;</div>
+<div class="line">    <span class="keywordtype">void</span> * buffer = malloc(1024);</div>
+<div class="line"></div>
+<div class="line">    <span class="keywordflow">if</span>(buffer == NULL){</div>
+<div class="line">        <span class="keywordflow">throw</span>(<a class="code" href="e4c_8h.html#add75d60a1beb6be775c7199b58c8bf49">NotEnoughMemoryException</a>, <span class="stringliteral">&quot;Could not allocate buffer.&quot;</span>);</div>
+<div class="line">    }</div>
+<div class="line"></div>
+<div class="line">    <span class="keywordflow">try</span>{</div>
+<div class="line">        foo = get_user_input(buffer, 1024);</div>
+<div class="line">    }<span class="keywordflow">catch</span>(BadUserInputException){</div>
+<div class="line">        foo = 123;</div>
+<div class="line">    }<span class="keywordflow">finally</span>{</div>
+<div class="line">        free(buffer);</div>
+<div class="line">    }</div>
+<div class="line"></div>
+<div class="line">    <span class="keywordflow">return</span>(foo);</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>This way you will never have to deal again with boring error codes, or check return values every time you call a function.</p>
 <h2>Exception Hierarchies</h2>
 <p>The possible exceptions in a program are organized in a <em>pseudo-hierarchy</em> of exceptions. <code>RuntimeException</code> is the root of the exceptions <em>pseudo-hierarchy</em>. <b>Any</b> exception can be caught by a <code><a class="el" href="e4c_8h.html#a629585c5169ebdb440b9015f8e87b4df">catch(RuntimeException)</a></code> block, <b>except</b> <code>AssertionException</code>.</p>
 <p>When an exception is thrown, control is transferred to the nearest dynamically-enclosing <code>catch</code> code block that handles the exception. Whether a particular <code>catch</code> block handles an exception is found out by comparing the type (and supertypes) of the actual thrown exception against the specified exception in the <code>catch</code> clause.</p>
