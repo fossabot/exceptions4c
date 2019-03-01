@@ -17,7 +17,7 @@ which map the semantics of exception handling you're probably already used to:
 
 You can use exceptions in C by writing `try/catch/finally` blocks:
 
-```{.c}
+```c
 #include "e4c.h"
 
 int foobar(){
