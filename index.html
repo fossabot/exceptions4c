@@ -123,29 +123,29 @@ $(document).ready(function(){initNavTree('index.html','');});
 <li><code>finally</code></li>
 <li><code>throw</code></li>
 </ul>
-<p>You can use exceptions in C by writing <code>try/catch/finally</code> blocks:</p>
-<div class="fragment"><div class="line"><span class="preprocessor">#include &quot;<a class="code" href="e4c_8h.html">e4c.h</a>&quot;</span></div>
-<div class="line"></div>
-<div class="line"><span class="keywordtype">int</span> foobar(){</div>
-<div class="line"></div>
-<div class="line">    <span class="keywordtype">int</span> foo;</div>
-<div class="line">    <span class="keywordtype">void</span> * buffer = malloc(1024);</div>
-<div class="line"></div>
-<div class="line">    <span class="keywordflow">if</span>(buffer == NULL){</div>
-<div class="line">        <span class="keywordflow">throw</span>(<a class="code" href="e4c_8h.html#add75d60a1beb6be775c7199b58c8bf49">NotEnoughMemoryException</a>, <span class="stringliteral">&quot;Could not allocate buffer.&quot;</span>);</div>
-<div class="line">    }</div>
-<div class="line"></div>
-<div class="line">    <span class="keywordflow">try</span>{</div>
-<div class="line">        foo = get_user_input(buffer, 1024);</div>
-<div class="line">    }<span class="keywordflow">catch</span>(BadUserInputException){</div>
-<div class="line">        foo = 123;</div>
-<div class="line">    }<span class="keywordflow">finally</span>{</div>
-<div class="line">        free(buffer);</div>
-<div class="line">    }</div>
-<div class="line"></div>
-<div class="line">    <span class="keywordflow">return</span>(foo);</div>
-<div class="line">}</div>
-</div><!-- fragment --><p>This way you will never have to deal again with boring error codes, or check return values every time you call a function.</p>
+<p>You can use exceptions in C by writing <code>try/catch/finally</code> blocks: </p>
+<pre class="fragment">#include "e4c.h"
+
+int foobar(){
+
+    int foo;
+    void * buffer = malloc(1024);
+
+    if(buffer == NULL){
+        throw(NotEnoughMemoryException, "Could not allocate buffer.");
+    }
+
+    try{
+        foo = get_user_input(buffer, 1024);
+    }catch(BadUserInputException){
+        foo = 123;
+    }finally{
+        free(buffer);
+    }
+
+    return(foo);
+}
+</pre><p>This way you will never have to deal again with boring error codes, or check return values every time you call a function.</p>
 <h2>Exception Hierarchies</h2>
 <p>The possible exceptions in a program are organized in a <em>pseudo-hierarchy</em> of exceptions. <code>RuntimeException</code> is the root of the exceptions <em>pseudo-hierarchy</em>. <b>Any</b> exception can be caught by a <code><a class="el" href="e4c_8h.html#a629585c5169ebdb440b9015f8e87b4df">catch(RuntimeException)</a></code> block, <b>except</b> <code>AssertionException</code>.</p>
 <p>When an exception is thrown, control is transferred to the nearest dynamically-enclosing <code>catch</code> code block that handles the exception. Whether a particular <code>catch</code> block handles an exception is found out by comparing the type (and supertypes) of the actual thrown exception against the specified exception in the <code>catch</code> clause.</p>
@@ -154,27 +154,61 @@ $(document).ready(function(){initNavTree('index.html','');});
 <li>the same type of that exception.</li>
 <li>the same type of any of the <em>supertypes</em> of that exception.</li>
 </ul>
-<p>If you write a <code>catch</code> block that handles an exception with no defined <em>subtype</em>, it will only handle that very specific exception. By grouping exceptions in <em>hierarchies</em>, you can design generic <code>catch</code> blocks that deal with several exceptions:</p>
-<p>```{.c} /* Name Default message Supertype E4C_DEFINE_EXCEPTION(ColorException, "Colorful error.", RuntimeException); E4C_DEFINE_EXCEPTION(RedException, "Red error.", ColorException); E4C_DEFINE_EXCEPTION(GreenException, "Green error.", ColorException); E4C_DEFINE_EXCEPTION(BlueException, "Blue error.", ColorException);</p>
-<p>...</p>
-<p>try{ int color = chooseColor(); if(color == 0xff0000) throw(RedException, "I don't like it."); if(color == 0x00ff00) <a class="el" href="e4c_8h.html#a482d649fcaafd28584629da3606e4ea7">throw(GreenException, NULL)</a>; if(color == 0x0000ff) throw(BlueException, "It's way too blue."); doSomething(color); }<a class="el" href="e4c_8h.html#a629585c5169ebdb440b9015f8e87b4df">catch(GreenException)</a>{ printf("You cannot use green."); }<a class="el" href="e4c_8h.html#a629585c5169ebdb440b9015f8e87b4df">catch(ColorException)</a>{ const <a class="el" href="structe4c__exception.html">e4c_exception</a> * e = <a class="el" href="e4c_8h.html#ab67ff2dbcdda36ef766b096e7198614d">e4c_get_exception()</a>; printf("You cannot use that color: %s (%s).", e-&gt;name, e-&gt;message); } ```</p>
-<p>When looking for a match, <code>catch</code> blocks are inspected in the order they appear <em>in the code</em>. If you place a handler for a superclass before a subclass handler, the second block will in fact be <b>unreachable</b>.</p>
+<p>If you write a <code>catch</code> block that handles an exception with no defined <em>subtype</em>, it will only handle that very specific exception. By grouping exceptions in <em>hierarchies</em>, you can design generic <code>catch</code> blocks that deal with several exceptions: </p>
+<pre class="fragment">/*                   Name             Default message   Supertype 
+E4C_DEFINE_EXCEPTION(ColorException, "Colorful error.", RuntimeException);
+E4C_DEFINE_EXCEPTION(RedException,   "Red error.",      ColorException);
+E4C_DEFINE_EXCEPTION(GreenException, "Green error.",    ColorException);
+E4C_DEFINE_EXCEPTION(BlueException,  "Blue error.",     ColorException);
+
+...
+
+try{
+    int color = chooseColor();
+    if(color == 0xff0000) throw(RedException, "I don't like it.");
+    if(color == 0x00ff00) throw(GreenException, NULL);
+    if(color == 0x0000ff) throw(BlueException, "It's way too blue.");
+    doSomething(color);
+}catch(GreenException){
+    printf("You cannot use green.");
+}catch(ColorException){
+    const e4c_exception * e = e4c_get_exception();
+    printf("You cannot use that color: %s (%s).", e-&gt;name, e-&gt;message);
+}
+</pre><p>When looking for a match, <code>catch</code> blocks are inspected in the order they appear <em>in the code</em>. If you place a handler for a superclass before a subclass handler, the second block will in fact be <b>unreachable</b>.</p>
 <h2>Dispose Pattern</h2>
 <p>There are other keywords related to resource handling:</p>
 <ul>
 <li><code>with... use</code></li>
 <li><code>using</code></li>
 </ul>
-<p>They allow you to express the <em>Dispose Pattern</em> in your code:</p>
-<p>```{.c} /* syntax #1 FOO f; <a class="el" href="e4c_8h.html#a4afea611dbbe18fc3e3665166b3cd7bc">with(f, e4c_dispose_FOO)</a> f = e4c_acquire_FOO(foo, bar); use do_something(f);</p>
-<p>/* syntax #2 (relies on 'e4c_acquire_BAR' and 'e4c_dispose_BAR') BAR bar; using(BAR, bar, ("BAR", 123) ){ do_something_else(bar); }</p>
-<p>/* syntax #3 (customized to specific resource types) FILE * report; e4c_using_file(report, "log.txt", "a"){ fputs("hello, world!\n", report); } ```</p>
-<p>This is a clean and terse way to handle all kinds of resources with implicit acquisition and automatic disposal.</p>
+<p>They allow you to express the <em>Dispose Pattern</em> in your code: </p>
+<pre class="fragment">/* syntax #1 
+FOO f;
+with(f, e4c_dispose_FOO) f = e4c_acquire_FOO(foo, bar); use do_something(f);
+
+/* syntax #2 (relies on 'e4c_acquire_BAR' and 'e4c_dispose_BAR') 
+BAR bar;
+using(BAR, bar, ("BAR", 123) ){
+    do_something_else(bar);
+}
+
+/* syntax #3 (customized to specific resource types) 
+FILE * report;
+e4c_using_file(report, "log.txt", "a"){
+    fputs("hello, world!\n", report);
+}
+</pre><p>This is a clean and terse way to handle all kinds of resources with implicit acquisition and automatic disposal.</p>
 <h2>Signal Handling</h2>
-<p>In addition, signals such as <code>SIGHUP</code>, <code>SIGFPE</code> and <code>SIGSEGV</code> can be handled in an <em>exceptional</em> way. Forget about scary segmentation faults, all you need is to catch <code>BadPointerException</code>:</p>
-<p>```{.c} int * pointer = NULL;</p>
-<p>try{ int oops = *pointer; }<a class="el" href="e4c_8h.html#a629585c5169ebdb440b9015f8e87b4df">catch(BadPointerException)</a>{ printf("No problem ;-)"); } ```</p>
-<h2>Multithreading</h2>
+<p>In addition, signals such as <code>SIGHUP</code>, <code>SIGFPE</code> and <code>SIGSEGV</code> can be handled in an <em>exceptional</em> way. Forget about scary segmentation faults, all you need is to catch <code>BadPointerException</code>: </p>
+<pre class="fragment">int * pointer = NULL;
+
+try{
+    int oops = *pointer;
+}catch(BadPointerException){
+    printf("No problem ;-)");
+}
+</pre><h2>Multithreading</h2>
 <p>If you are using threads in your program, you must enable the <em>thread-safe</em> version of the library by defining <code>E4C_THREADSAFE</code> at compiler level.</p>
 <p>The usage of the framework does not vary between single and multithreaded programs. The same semantics apply. The only caveat is that <b>the behavior of signal handling is undefined in a multithreaded program</b> so use this feature with caution.</p>
 <h2>Integration</h2>
@@ -216,7 +250,7 @@ $(document).ready(function(){initNavTree('index.html','');});
     <li class="footer">
     <a href="https://github.com/guillermocalvo/exceptions4c/"><strong>exceptions4c</strong></a>
     &bull;
-    Copyright <a href="https://guillermo.in/"><strong>Guillermo Calvo</strong></a> 2019
+    Copyright <a href="https://guillermo.dev/"><strong>Guillermo Calvo</strong></a> 2019
     &bull;
     Documentation generated by
     <a href="http://www.doxygen.org/index.html">
